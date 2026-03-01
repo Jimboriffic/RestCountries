@@ -1,7 +1,5 @@
 package com.james.restcountries.data
 
-package com.james.restcountries.data
-
 import retrofit2.http.GET
 
 // Gets all countries from API
