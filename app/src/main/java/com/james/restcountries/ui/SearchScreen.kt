@@ -11,7 +11,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.james.restcountries.viewmodel.CountryViewModel
 import java.net.URLEncoder
@@ -23,16 +22,21 @@ import androidx.compose.foundation.layout.height
 @Composable
 fun SearchScreen(
     navController: NavController,
-    viewModel: CountryViewModel = viewModel()
-) { // read current search text from ViewModel
+    viewModel: CountryViewModel
+) {
+// read current search text from ViewModel
     val query by viewModel.searchQuery
     val countries = viewModel.filteredCountries()
 
     // layout container
     Column {
+        // debug status
+        if (viewModel.isLoading.value) Text("Loading...")
+        viewModel.error.value?.let { Text("Error: $it") }
+        Text("Loaded: ${viewModel.countries.value.size}")
+
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("Loaded: ${viewModel.countries.value.size}")
         TextField(
             value = query,
             onValueChange = { viewModel.updateSearch(it) }, // Updates ViewModel when user inputs text
