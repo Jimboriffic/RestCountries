@@ -12,6 +12,7 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import com.james.restcountries.util.NumberFormatter
 
 
 @Composable
@@ -34,7 +35,8 @@ fun DetailScreen(
         (16.dp,
         end = 16.dp,
         bottom = 16.dp,
-        top = 80.dp)) {
+        top = 80.dp))
+    {
         AsyncImage(
             model = country.flags?.png,
             contentDescription = "Flag of ${country.name.common}",
@@ -44,6 +46,7 @@ fun DetailScreen(
         Text("Name: ${country.name.common}")
         Text("Capital: ${country.capital?.joinToString() ?: "N/A"}")
         Text("Region: ${country.region ?: "N/A"}")
-        Text("Population: ${country.population ?: "N/A"}")
+        Text("Population: ${country.population?.let(NumberFormatter::populationDotGrouping) ?: "N/A"}")
+
     }
 }

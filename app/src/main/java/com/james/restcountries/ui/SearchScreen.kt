@@ -33,7 +33,7 @@ fun SearchScreen(
         // debug status
         if (viewModel.isLoading.value) Text("Loading...")
         viewModel.error.value?.let { Text("Error: $it") }
-        Text("Loaded: ${viewModel.countries.value.size}")
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
