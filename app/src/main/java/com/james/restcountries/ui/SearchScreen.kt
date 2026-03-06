@@ -1,11 +1,11 @@
 package com.james.restcountries.ui
 
-import androidx.compose.foundation.clickable
+// // I used ".*" as much as possible for a clean look, but maybe it's too cpu intensive?
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
@@ -15,8 +15,9 @@ import androidx.navigation.NavController
 import com.james.restcountries.viewmodel.CountryViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import java.text.Collator
+import java.util.Locale
+
 
 // get CountryViewModel for this screen
 @Composable
@@ -24,9 +25,15 @@ fun SearchScreen(
     navController: NavController,
     viewModel: CountryViewModel
 ) {
-// read current search text from ViewModel
+    // read current search text from ViewModel
     val query by viewModel.searchQuery
+    // The variables below make sure the country list is sorted alphabetically
+    val collator = remember { Collator.getInstance(Locale.getDefault()) }
     val countries = viewModel.filteredCountries()
+        .sortedWith(compareBy(collator) { it.name.common })
+
+
+    var listExpanded by remember { mutableStateOf(false) }
 
     // layout container
     Column {
@@ -39,30 +46,49 @@ fun SearchScreen(
 
         TextField(
             value = query,
-            onValueChange = { viewModel.updateSearch(it) }, // Updates ViewModel when user inputs text
+            onValueChange = {
+                viewModel.updateSearch(it) // Updates ViewModel when user inputs text
+            listExpanded = true
+           },
             label = { Text("Search country") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
-        // Scrollable list of countries
-        LazyColumn {
-            items(countries) { country ->
-                val name = country.name.common
-
+                .padding(horizontal = 16.dp),
+            trailingIcon = {
                 Text(
-                    text = name, // only shows the country name
+                    text = if (listExpanded) "Hide countries" else "Show countries",
+                    modifier = Modifier
+                        .clickable { listExpanded = !listExpanded }
+                        .padding(end = 12.dp)
+                )
+                }
+        )
+
+        // Shows the list of countries with an animation (expand/collapse)
+    AnimatedVisibility(visible = listExpanded) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            items(
+                items = countries,
+            key = { it.name.common }
+            ) { country ->
+                val name = country.name.common
+                Text(
+                    text = name,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // For countries with spaces like United Kingdom
                             val encoded = URLEncoder.encode(name, StandardCharsets.UTF_8.toString())
-                            // Navigate to detail screen
                             navController.navigate("detail/$encoded")
-                        } // adds spaces around the item
+                            listExpanded = false
+                        }
                         .padding(16.dp)
                 )
             }
         }
     }
+}
 }
